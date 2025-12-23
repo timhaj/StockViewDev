@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../screens/stock_detail_screen.dart';
 
 class StockRow extends StatelessWidget {
   final String name;
@@ -14,14 +15,24 @@ class StockRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Row(
-        children: [
-          Expanded(child: Text(name)),
-          Expanded(child: Text(change_p)),
-          Expanded(child: Text(price)),
-        ],
+    return InkWell(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => StockDetailScreen(symbol: name),
+          ),
+        );
+      },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: Row(
+          children: [
+            Expanded(child: Text(name)),
+            Expanded(child: Text(change_p)),
+            Expanded(child: Text(price)),
+          ],
+        ),
       ),
     );
   }

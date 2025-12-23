@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import '../models/stock.dart';
+import '../models/stock_symbol.dart';
 import '../services/finhub_service.dart';
 import '../widgets/stock_row.dart';
+import 'search_screen.dart';
+
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -35,13 +38,18 @@ class _HomeScreenState extends State<HomeScreen> {
   'AKRBF',
   'EQNR',
   'VT'
-];
-
+  ];
+  late List<StockSymbol> allSymbols;
 
   @override
   void initState() {
     super.initState();
+    _loadSymbols();
     _fetchStocks();
+  }
+
+  Future<void> _loadSymbols() async {
+    allSymbols = await _FinService.fetchUsSymbols();
   }
 
   Future<void> _fetchStocks() async {
@@ -121,6 +129,16 @@ class _HomeScreenState extends State<HomeScreen> {
       // ⬇️ Bottom navigation
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
+        currentIndex: 0,
+        onTap: (index) {
+          if (index == 1) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const SearchScreen()),
+            );
+          }
+        },
+
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
