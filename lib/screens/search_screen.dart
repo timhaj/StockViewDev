@@ -38,7 +38,7 @@ class _SearchScreenState extends State<SearchScreen> {
       print('Error loading symbols: $e');
     }
   }
-  
+
   Future<void> _search() async {
     final ticker = _controller.text.trim().toUpperCase();
     if (ticker.isEmpty) return;
@@ -71,60 +71,65 @@ class _SearchScreenState extends State<SearchScreen> {
       appBar: AppBar(title: const Text('Search')),
       body: Padding(
         padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
+        child: symbolsLoading
+            ? const Center(child: CircularProgressIndicator()) // loader za simbole
+            : Stack(
+                children: [
+                  Column(
+                    children: [
+                      Autocomplete<StockSymbol>(
+                        optionsBuilder: (value) {
+                          if (value.text.isEmpty) {
+                            return const Iterable<StockSymbol>.empty();
+                          }
+                          final query = value.text.toUpperCase();
+                          return allSymbols
+                              .where((s) => s.displaySymbol.startsWith(query))
+                              .take(10);
+                        },
+                        displayStringForOption: (option) =>
+                            '${option.displaySymbol} – ${option.description}',
+                        onSelected: (selection) {
+                          _controller.text = selection.displaySymbol;
+                          _search();
+                        },
+                        fieldViewBuilder: (context, controller, focusNode, _) {
+                          _controller = controller;
+                          return TextField(
+                            controller: controller,
+                            focusNode: focusNode,
+                            decoration: const InputDecoration(
+                              labelText: 'Search ticker',
+                              border: OutlineInputBorder(),
+                              suffixIcon: Icon(Icons.search),
+                            ),
+                            onSubmitted: (_) => _search(),
+                          );
+                        },
+                      ),
+                      const SizedBox(height: 16),
 
-            // ⏳ Loader za simbole
-            if (symbolsLoading)
-              const CircularProgressIndicator()
-            else
-              Autocomplete<StockSymbol>(
-                optionsBuilder: (value) {
-                  if (value.text.isEmpty) {
-                    return const Iterable<StockSymbol>.empty();
-                  }
-                  final query = value.text.toUpperCase();
-                  return allSymbols
-                      .where((s) => s.displaySymbol.startsWith(query))
-                      .take(10);
-                },
-                displayStringForOption: (option) =>
-                    '${option.displaySymbol} – ${option.description}',
-                onSelected: (selection) {
-                  _controller.text = selection.displaySymbol;
-                  _search();
-                },
-                fieldViewBuilder: (context, controller, focusNode, _) {
-                  _controller = controller;
-                  return TextField(
-                    controller: controller,
-                    focusNode: focusNode,
-                    decoration: const InputDecoration(
-                      labelText: 'Search ticker',
-                      border: OutlineInputBorder(),
-                      suffixIcon: Icon(Icons.search),
+                      if (error != null)
+                        Text(error!, style: const TextStyle(color: Colors.red)),
+
+                      if (result != null)
+                        StockRow(
+                          name: result!.symbol,
+                          change_p: result!.change_p,
+                          price: '\$${result!.price}',
+                        ),
+                    ],
+                  ),
+                  if (isLoading)
+                    const Positioned.fill(
+                      child: Center(
+                        child: CircularProgressIndicator(),
+                      ),
                     ),
-                    onSubmitted: (_) => _search(),
-                  );
-                },
+                ],
               ),
-
-            const SizedBox(height: 16),
-
-            if (isLoading) const CircularProgressIndicator(),
-
-            if (error != null)
-              Text(error!, style: const TextStyle(color: Colors.red)),
-
-            if (result != null)
-              StockRow(
-                name: result!.symbol,
-                change_p: result!.change_p,
-                price: '\$${result!.price}',
-              ),
-          ],
-        ),
       ),
     );
   }
+
 }

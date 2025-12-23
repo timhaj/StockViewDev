@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import '../models/stock.dart';
 import '../models/stock_symbol.dart';
 import '../services/finhub_service.dart';
+import '../services/stock_service.dart';
 import '../widgets/stock_row.dart';
+import '../widgets/sp500_chart.dart';
 import 'search_screen.dart';
 
 
@@ -90,7 +92,23 @@ class _HomeScreenState extends State<HomeScreen> {
                 border: Border.all(color: Colors.grey),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: const Center(child: Text('Graph will be here')),
+              child: FutureBuilder<List<StockDataPoint>>(
+                future: StockService.fetchSP500Data(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  
+                  if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
+                    return const Center(child: Text('Unable to load data'));
+                  }
+                  
+                  return Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: SP500Chart(data: snapshot.data!),
+                  );
+                },
+              ),
             ),
 
             const SizedBox(height: 16),
