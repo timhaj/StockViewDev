@@ -143,9 +143,6 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
                     
                     const SizedBox(height: 16),
                     _buildFinancialsReportedSection(),
-
-                    const SizedBox(height: 16),
-                    _buildEarningsCalendar(),
                   ],
                 ),
     );
@@ -461,42 +458,5 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
       );
     },
   );
-}
-
-  // ================= EARNINGS CALENDAR =================
-  Widget _buildEarningsCalendar() {
-    final now = DateTime.now();
-    final from = '${now.year}-${now.month.toString().padLeft(2,'0')}-01';
-    final to = '${now.year}-${now.month.toString().padLeft(2,'0')}-31';
-
-    return FutureBuilder<List<dynamic>>(
-      future: _finService.getEarningsCalendar(from: from, to: to),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        }
-        if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
-          return const Text('No earnings events this month');
-        }
-
-        final earnings = snapshot.data!;
-
-        return Card(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text('Earnings Calendar', style: TextStyle(fontWeight: FontWeight.bold)),
-                const SizedBox(height: 8),
-                ...earnings.take(5).map((e) {
-                  return Text('${e['date'] ?? ''} • ${e['symbol'] ?? ''} • ${e['epsEstimate'] ?? ''}');
-                }),
-              ],
-            ),
-          ),
-        );
-      },
-    );
   }
 }

@@ -7,6 +7,7 @@ import '../widgets/stock_row.dart';
 import '../widgets/sp500_chart.dart';
 import '../widgets/market_selector.dart';
 import 'search_screen.dart';
+import 'calendar.dart';
 
 
 class HomeScreen extends StatefulWidget {
@@ -96,51 +97,51 @@ class _HomeScreenState extends State<HomeScreen> {
           const SizedBox(height: 12),
           
          Container(
-  height: 180,
-  width: double.infinity,
-  decoration: BoxDecoration(
-    border: Border.all(color: Colors.grey),
-    borderRadius: BorderRadius.circular(8),
-  ),
-  child: FutureBuilder<MarketData>(
-    key: ValueKey(selectedMarket),
-    future: StockService.fetchMarketData(selectedMarket),
-    builder: (context, snapshot) {
-      if (snapshot.connectionState == ConnectionState.waiting) {
-        return const Center(child: CircularProgressIndicator());
-      }
-      
-      if (snapshot.hasError || !snapshot.hasData || snapshot.data!.points.isEmpty) {
-        return Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text('Unable to load data'),
-              const SizedBox(height: 8),
-              TextButton(
-                onPressed: () => setState(() {}),
-                child: const Text('Retry'),
-              ),
-            ],
+            height: 180,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.grey),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: FutureBuilder<MarketData>(
+              key: ValueKey(selectedMarket),
+              future: StockService.fetchMarketData(selectedMarket),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                
+                if (snapshot.hasError || !snapshot.hasData || snapshot.data!.points.isEmpty) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Text('Unable to load data'),
+                        const SizedBox(height: 8),
+                        TextButton(
+                          onPressed: () => setState(() {}),
+                          child: const Text('Retry'),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+                
+                return Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: SP500Chart(
+                    data: snapshot.data!.points,
+                    currency: snapshot.data!.currency, // Pass currency
+                  ),
+                );
+              },
+            ),
           ),
-        );
-      }
-      
-      return Padding(
-        padding: const EdgeInsets.all(16),
-        child: SP500Chart(
-          data: snapshot.data!.points,
-          currency: snapshot.data!.currency, // Pass currency
-        ),
-      );
-    },
-  ),
-),
 
-            const SizedBox(height: 16),
+          const SizedBox(height: 16),
 
-            // 📊 Table header
-            Row(
+          // 📊 Table header
+          Row(
               children: const [
                 // Stock - levo
                 Expanded(
@@ -181,9 +182,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ],
             ),
-            const Divider(),
-
-
+            const Divider(), 
             // 📋 Table content
             Expanded(
               child: isLoading
@@ -204,31 +203,63 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
 
-      // ⬇️ Bottom navigation
+     
+
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         currentIndex: 0,
         onTap: (index) {
-          if (index == 1) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const SearchScreen()),
-            );
+          switch (index) {
+            case 0:
+              // Home - trenutno ostani na tem screen-u
+              break;
+            case 1:
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const SearchScreen()),
+              );
+              break;
+            case 2:
+              /*
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const WatchlistScreen()),
+              );
+              break;
+              */
+            case 3:
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const EarningsCalendarScreen()),
+              );
+              break;
+              
+            case 4:
+              /*
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const SettingsScreen()),
+              );
+              break;
+              */
           }
         },
-
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
             label: 'Home',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.search),   // lupa za Search
+            icon: Icon(Icons.search),
             label: 'Search',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.list),     // seznam za Watchlist
+            icon: Icon(Icons.list),
             label: 'Watchlist',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.calendar_month),
+            label: 'Calendar',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.settings),
@@ -236,6 +267,8 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
+
     );
   }
+  
 }
