@@ -15,6 +15,12 @@ class StockRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isNegative = change_p.trim().startsWith('-');
+
+    final Color changeColor = isNegative ? Colors.red : Colors.green;
+    final IconData changeIcon =
+        isNegative ? Icons.arrow_downward : Icons.arrow_upward;
+
     return InkWell(
       onTap: () {
         Navigator.push(
@@ -28,9 +34,42 @@ class StockRow extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 8),
         child: Row(
           children: [
-            Expanded(child: Text(name)),
-            Expanded(child: Text(change_p)),
-            Expanded(child: Text(price)),
+            // 🏷 Ticker
+            Expanded(
+              child: Text(
+                name,
+                style: const TextStyle(fontWeight: FontWeight.w500),
+              ),
+            ),
+
+            // 🔴🟢 Change %
+            Expanded(
+              child: Row(
+                children: [
+                  Icon(
+                    changeIcon,
+                    size: 16,
+                    color: changeColor,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    change_p,
+                    style: TextStyle(
+                      color: changeColor,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // 💲 Price
+            Expanded(
+              child: Text(
+                price,
+                textAlign: TextAlign.right,
+              ),
+            ),
           ],
         ),
       ),
