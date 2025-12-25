@@ -262,8 +262,8 @@ class _HomeScreenState extends State<HomeScreen> {
             label: 'Calendar',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: 'Settings',
+            icon: Icon(Icons.account_circle),
+            label: 'User',
           ),
         ],
       ),
