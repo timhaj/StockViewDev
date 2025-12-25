@@ -8,7 +8,8 @@ import '../widgets/sp500_chart.dart';
 import '../widgets/market_selector.dart';
 import 'search_screen.dart';
 import 'calendar.dart';
-
+import 'watchlist_screen.dart';
+import 'user_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -23,26 +24,25 @@ class _HomeScreenState extends State<HomeScreen> {
   List<Stock> stocks = [];
   bool isLoading = true;
 
-  // Seznam delnic za primer
   final List<String> symbols = [
-  'AAPL',   // Apple
-  'MSFT',   // Microsoft
-  'GOOGL',  // Alphabet / Google
-  'AMZN',   // Amazon
-  'TSLA',   // Tesla
-  'META',   // Meta / Facebook
-  'NVDA',   // Nvidia
-  'BRK.B',  // Berkshire Hathaway
-  'JPM',    // JP Morgan
-  'V',      // Visa
-  'JNJ',    // Johnson & Johnson
-  'WMT',    // Walmart
-  'PG',     // Procter & Gamble
-  'DIS',    // Disney
-  'NFLX',   // Netflix
-  'AKRBF',
-  'EQNR',
-  'VT'
+    'AAPL',
+    'MSFT',
+    'GOOGL',
+    'AMZN',
+    'TSLA',
+    'META',
+    'NVDA',
+    'BRK.B',
+    'JPM',
+    'V',
+    'JNJ',
+    'WMT',
+    'PG',
+    'DIS',
+    'NFLX',
+    'AKRBF',
+    'EQNR',
+    'VT'
   ];
   late List<StockSymbol> allSymbols;
 
@@ -82,7 +82,6 @@ class _HomeScreenState extends State<HomeScreen> {
         title: const Text('StockView'),
         centerTitle: true,
       ),
-
       body: Padding(
         padding: const EdgeInsets.all(12),
         child: Column(
@@ -94,56 +93,53 @@ class _HomeScreenState extends State<HomeScreen> {
                 });
               },
             ),
-          const SizedBox(height: 12),
-          
-         Container(
-            height: 180,
-            width: double.infinity,
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.grey),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: FutureBuilder<MarketData>(
-              key: ValueKey(selectedMarket),
-              future: StockService.fetchMarketData(selectedMarket),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-                
-                if (snapshot.hasError || !snapshot.hasData || snapshot.data!.points.isEmpty) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Text('Unable to load data'),
-                        const SizedBox(height: 8),
-                        TextButton(
-                          onPressed: () => setState(() {}),
-                          child: const Text('Retry'),
-                        ),
-                      ],
+            const SizedBox(height: 12),
+            
+            Container(
+              height: 180,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: FutureBuilder<MarketData>(
+                key: ValueKey(selectedMarket),
+                future: StockService.fetchMarketData(selectedMarket),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  
+                  if (snapshot.hasError || !snapshot.hasData || snapshot.data!.points.isEmpty) {
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Text('Unable to load data'),
+                          const SizedBox(height: 8),
+                          TextButton(
+                            onPressed: () => setState(() {}),
+                            child: const Text('Retry'),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+                  
+                  return Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: SP500Chart(
+                      data: snapshot.data!.points,
+                      currency: snapshot.data!.currency,
                     ),
                   );
-                }
-                
-                return Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: SP500Chart(
-                    data: snapshot.data!.points,
-                    currency: snapshot.data!.currency, // Pass currency
-                  ),
-                );
-              },
+                },
+              ),
             ),
-          ),
+            const SizedBox(height: 16),
 
-          const SizedBox(height: 16),
-
-          // 📊 Table header
-          Row(
+            Row(
               children: const [
-                // Stock - levo
                 Expanded(
                   flex: 3,
                   child: Align(
@@ -154,8 +150,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                 ),
-
-                // Change % daily - sredina
                 Expanded(
                   flex: 2,
                   child: Align(
@@ -167,8 +161,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                 ),
-
-                // Price / Share - desno
                 Expanded(
                   flex: 2,
                   child: Align(
@@ -182,8 +174,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ],
             ),
-            const Divider(), 
-            // 📋 Table content
+            const Divider(),
+            
             Expanded(
               child: isLoading
                   ? const Center(child: CircularProgressIndicator())
@@ -202,16 +194,12 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
       ),
-
-     
-
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         currentIndex: 0,
         onTap: (index) {
           switch (index) {
             case 0:
-              // Home - trenutno ostani na tem screen-u
               break;
             case 1:
               Navigator.push(
@@ -220,28 +208,23 @@ class _HomeScreenState extends State<HomeScreen> {
               );
               break;
             case 2:
-              /*
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (_) => const WatchlistScreen()),
               );
               break;
-              */
             case 3:
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (_) => const EarningsCalendarScreen()),
               );
               break;
-              
             case 4:
-              /*
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (_) => const SettingsScreen()),
+                MaterialPageRoute(builder: (_) => const UserScreen()),
               );
               break;
-              */
           }
         },
         items: const [
@@ -262,13 +245,11 @@ class _HomeScreenState extends State<HomeScreen> {
             label: 'Calendar',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: 'Settings',
+            icon: Icon(Icons.account_circle),
+            label: 'User',
           ),
         ],
       ),
-
     );
   }
-  
 }
