@@ -5,6 +5,7 @@ import '../services/finhub_service.dart';
 import '../services/stock_service.dart';
 import '../widgets/stock_row.dart';
 import '../widgets/sp500_chart.dart';
+import '../widgets/market_selector.dart';
 import 'search_screen.dart';
 
 
@@ -16,6 +17,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  String selectedMarket = 'US';
   final FinnhubService _FinService = FinnhubService();
   List<Stock> stocks = [];
   bool isLoading = true;
@@ -84,32 +86,56 @@ class _HomeScreenState extends State<HomeScreen> {
         padding: const EdgeInsets.all(12),
         child: Column(
           children: [
-            // 📈 Graph placeholder
-            Container(
-              height: 180,
-              width: double.infinity,
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: FutureBuilder<List<StockDataPoint>>(
-                future: StockService.fetchSP500Data(),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
-                  
-                  if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
-                    return const Center(child: Text('Unable to load data'));
-                  }
-                  
-                  return Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: SP500Chart(data: snapshot.data!),
-                  );
-                },
-              ),
+            MarketSelector(
+              onMarketChanged: (market) {
+                setState(() {
+                  selectedMarket = market;
+                });
+              },
             ),
+          const SizedBox(height: 12),
+          
+         Container(
+            height: 180,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.grey),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: FutureBuilder<MarketData>(
+              key: ValueKey(selectedMarket),
+              future: StockService.fetchMarketData(selectedMarket),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                
+                if (snapshot.hasError || !snapshot.hasData || snapshot.data!.points.isEmpty) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Text('Unable to load data'),
+                        const SizedBox(height: 8),
+                        TextButton(
+                          onPressed: () => setState(() {}),
+                          child: const Text('Retry'),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+                
+                return Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: SP500Chart(
+                    data: snapshot.data!.points,
+                    currency: snapshot.data!.currency, // Pass currency
+                  ),
+                );
+              },
+            ),
+          ),
 
             const SizedBox(height: 16),
 

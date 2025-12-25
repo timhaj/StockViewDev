@@ -5,8 +5,13 @@ import 'package:intl/intl.dart';
 
 class SP500Chart extends StatelessWidget {
   final List<StockDataPoint> data;
+  final String currency; // Add this
   
-  const SP500Chart({Key? key, required this.data}) : super(key: key);
+  const SP500Chart({
+    Key? key, 
+    required this.data,
+    this.currency = '\$', // Default to dollar
+  }) : super(key: key);
   
   @override
   Widget build(BuildContext context) {
@@ -19,7 +24,11 @@ class SP500Chart extends StatelessWidget {
     
     return LineChart(
       LineChartData(
-        gridData: FlGridData(show: false), // No grid lines
+        gridData: FlGridData(show: false),
+        
+
+
+
         titlesData: FlTitlesData(
           leftTitles: AxisTitles(
             sideTitles: SideTitles(
@@ -30,7 +39,7 @@ class SP500Chart extends StatelessWidget {
                 return Padding(
                   padding: const EdgeInsets.only(right: 8),
                   child: Text(
-                    '\$${value.toStringAsFixed(0)}',
+                    '$currency${value.toStringAsFixed(0)}', // Use currency here
                     style: const TextStyle(fontSize: 10, color: Colors.grey),
                   ),
                 );
@@ -60,8 +69,38 @@ class SP500Chart extends StatelessWidget {
           topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
         ),
         borderData: FlBorderData(show: false),
-        minY: minPrice * 0.99, // Small margin restored
+        minY: minPrice * 0.99,
         maxY: maxPrice * 1.01,
+
+                lineTouchData: LineTouchData(
+          enabled: true,
+          touchTooltipData: LineTouchTooltipData(
+            getTooltipColor: (touchedSpot) => Colors.blueGrey.withOpacity(0.8),
+            tooltipRoundedRadius: 8,
+            tooltipPadding: const EdgeInsets.all(8),
+            getTooltipItems: (List<LineBarSpot> touchedSpots) {
+              return touchedSpots.map((spot) {
+                final index = spot.x.toInt();
+                if (index >= data.length) return null;
+                
+                final dataPoint = data[index];
+                final dateStr = DateFormat('MMM d, yyyy').format(dataPoint.date);
+                final priceStr = '$currency${dataPoint.price.toStringAsFixed(2)}';
+                
+                return LineTooltipItem(
+                  '$dateStr\n$priceStr',
+                  const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12,
+                  ),
+                );
+              }).toList();
+            },
+          ),
+        ),
+
+
         lineBarsData: [
           LineChartBarData(
             spots: spots,
