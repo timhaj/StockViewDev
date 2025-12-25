@@ -368,8 +368,45 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
       final bs = latestReport['report']['bs'] ?? [];
       final ic = latestReport['report']['ic'] ?? [];
       final cf = latestReport['report']['cf'] ?? [];
+      final bsKeys = [
+        'Cash and cash equivalents',
+        'Marketable securities',
+        'Accounts receivable, net',
+        'Total current assets',
+        'Property, plant and equipment, net',
+        'Total assets',
+        'Total current liabilities',
+        'Long-term debt',
+        'Total liabilities',
+        'Total shareholders’ equity',
+      ];
 
-      Widget buildSection(String title, List<dynamic> items) {
+      final icKeys = [
+        'Net sales',
+        'Cost of sales',
+        'Gross margin',
+        'Operating income',
+        'Net income',
+        'EPS, basic',
+        'EPS, diluted',
+      ];
+
+      final cfKeys = [
+        'Net Cash Provided by (Used in) Operating Activities',
+        'Payments to Acquire Property, Plant, and Equipment',
+        'Net Cash Provided by (Used in) Financing Activities',
+      ];
+
+
+
+      Widget buildSection(String title, List<dynamic> items, List<String> keysToShow) {
+        final filteredItems = items.where((i) {
+          final label = i['label'] ?? i['concept'] ?? '';
+          return keysToShow.contains(label);
+        }).toList();
+
+        if (filteredItems.isEmpty) return const SizedBox.shrink();
+
         return Card(
           child: Padding(
             padding: const EdgeInsets.all(16),
@@ -378,7 +415,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
               children: [
                 Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
                 const SizedBox(height: 8),
-                ...items.map((i) {
+                ...filteredItems.map((i) {
                   final label = i['label'] ?? i['concept'] ?? '';
                   final rawValue = i['value'];
                   final unit = (i['unit'] ?? '').toString();
@@ -404,21 +441,22 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
                       ],
                     ),
                   );
-                }).toList()
+                }).toList(),
               ],
             ),
           ),
         );
       }
 
+
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          buildSection('Balance Sheet', bs),
+          buildSection('Balance Sheet', bs, bsKeys),
           const SizedBox(height: 16),
-          buildSection('Income Statement', ic),
+          buildSection('Income Statement', ic, icKeys),
           const SizedBox(height: 16),
-          buildSection('Cash Flow', cf),
+          buildSection('Cash Flow', cf, cfKeys),
         ],
       );
     },

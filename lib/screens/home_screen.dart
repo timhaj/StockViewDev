@@ -96,59 +96,93 @@ class _HomeScreenState extends State<HomeScreen> {
           const SizedBox(height: 12),
           
          Container(
-            height: 180,
-            width: double.infinity,
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.grey),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: FutureBuilder<MarketData>(
-              key: ValueKey(selectedMarket),
-              future: StockService.fetchMarketData(selectedMarket),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-                
-                if (snapshot.hasError || !snapshot.hasData || snapshot.data!.points.isEmpty) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Text('Unable to load data'),
-                        const SizedBox(height: 8),
-                        TextButton(
-                          onPressed: () => setState(() {}),
-                          child: const Text('Retry'),
-                        ),
-                      ],
-                    ),
-                  );
-                }
-                
-                return Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: SP500Chart(
-                    data: snapshot.data!.points,
-                    currency: snapshot.data!.currency, // Pass currency
-                  ),
-                );
-              },
-            ),
+  height: 180,
+  width: double.infinity,
+  decoration: BoxDecoration(
+    border: Border.all(color: Colors.grey),
+    borderRadius: BorderRadius.circular(8),
+  ),
+  child: FutureBuilder<MarketData>(
+    key: ValueKey(selectedMarket),
+    future: StockService.fetchMarketData(selectedMarket),
+    builder: (context, snapshot) {
+      if (snapshot.connectionState == ConnectionState.waiting) {
+        return const Center(child: CircularProgressIndicator());
+      }
+      
+      if (snapshot.hasError || !snapshot.hasData || snapshot.data!.points.isEmpty) {
+        return Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text('Unable to load data'),
+              const SizedBox(height: 8),
+              TextButton(
+                onPressed: () => setState(() {}),
+                child: const Text('Retry'),
+              ),
+            ],
           ),
+        );
+      }
+      
+      return Padding(
+        padding: const EdgeInsets.all(16),
+        child: SP500Chart(
+          data: snapshot.data!.points,
+          currency: snapshot.data!.currency, // Pass currency
+        ),
+      );
+    },
+  ),
+),
 
             const SizedBox(height: 16),
 
             // 📊 Table header
             Row(
               children: const [
-                Expanded(child: Text('Stock', style: TextStyle(fontWeight: FontWeight.bold))),
-                Expanded(child: Text('Change % daily', style: TextStyle(fontWeight: FontWeight.bold))),
-                Expanded(child: Text('Price / Share', style: TextStyle(fontWeight: FontWeight.bold))),
+                // Stock - levo
+                Expanded(
+                  flex: 3,
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      'Stock',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ),
+
+                // Change % daily - sredina
+                Expanded(
+                  flex: 2,
+                  child: Align(
+                    alignment: Alignment.center,
+                    child: Text(
+                      'Change % daily',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
+
+                // Price / Share - desno
+                Expanded(
+                  flex: 2,
+                  child: Align(
+                    alignment: Alignment.centerRight,
+                    child: Text(
+                      'Price / Share',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                      textAlign: TextAlign.right,
+                    ),
+                  ),
+                ),
               ],
             ),
-
             const Divider(),
+
 
             // 📋 Table content
             Expanded(
