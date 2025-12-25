@@ -8,10 +8,19 @@ class StockService {
     'JP': {'symbol': '^N225', 'currency': '¥'},
   };
   
-  static Future<MarketData> fetchMarketData(String market, {int days = 60}) async {
-    final info = marketInfo[market] ?? marketInfo['US']!;
-    final symbol = info['symbol']!;
-    final currency = info['currency']!;
+  static Future<MarketData> fetchMarketData(String market, {int days = 100}) async {
+    final symbol;
+    final currency;
+
+    if (market == "US" || market == "EU" || market == "JP"){
+        final info = marketInfo[market] ?? marketInfo['US']!;
+        symbol = info['symbol']!;
+        currency = info['currency']!;
+    }else{
+      symbol = market;
+      currency = '\$';
+    }
+    
     
     final endDate = DateTime.now().millisecondsSinceEpoch ~/ 1000;
     final startDate = DateTime.now().subtract(Duration(days: days + 10)).millisecondsSinceEpoch ~/ 1000;
